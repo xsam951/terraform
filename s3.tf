@@ -1,7 +1,6 @@
 # create s3 bucket
-resource "aws_s3_bucket" "s3_bucket" {  
+resource "aws_s3_bucket" "s3_buck"  {  
   bucket = "sam_s3_bucket_deham14"
-  acl    = "private"
   versioning {
     enabled = true
   }
