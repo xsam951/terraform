@@ -1,6 +1,6 @@
 # create s3 bucket
 resource "aws_s3_bucket" "s3_bucket"  {  
-  bucket = "sam_s3_bucket_deham14"
+  bucket = "sam-s3-bucket-deham14"
   
   server_side_encryption_configuration {
     rule {
