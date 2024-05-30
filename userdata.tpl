@@ -1,4 +1,6 @@
 #! /bin/bash
+# Installing a Wordpress Server
+
 # Install updates
 sudo yum update -y
 # Install Apache server
