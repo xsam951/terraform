@@ -1,9 +1,6 @@
 # create s3 bucket
 resource "aws_s3_bucket" "s3_buck"  {  
   bucket = "sam_s3_bucket_deham14"
-  versioning {
-    enabled = true
-  }
   
   server_side_encryption_configuration {
     rule {
@@ -18,3 +15,10 @@ resource "aws_s3_bucket" "s3_buck"  {
     Environment = "Dev"
   }
 }
+
+# Enable versioning for the S3 bucket
+resource "aws_s3_bucket_versioning" "s3_bucket_versioning" {
+  bucket = aws_s3_bucket.s3_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
