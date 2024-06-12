@@ -28,7 +28,7 @@ resource "aws_lb" "application-lb" {
   internal           = false
   load_balancer_type = "application"
   subnets            = [aws_subnet.public-1.id,aws_subnet.public-2.id]
-  security_groups    = [aws_security_group.sg_vpc.id]
+  security_groups    = [aws_security_group.sec_group.id]
   ip_address_type    = "ipv4"
 
   tags = {

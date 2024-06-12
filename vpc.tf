@@ -1,3 +1,13 @@
+terraform {
+  cloud {
+    organization = "sandbox-deham14-sam"
+
+    workspaces {
+      name = "testing_formCLI"
+    }
+  }
+}
+
 # Create a VPC to launch our instances into
 resource "aws_vpc" "dev_vpc" {
   cidr_block = "10.0.0.0/16"  
