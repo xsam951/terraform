@@ -1,54 +1,54 @@
-locals {
-  # The name of the EC2 instance
-  name = "awsrestartproject"
-  owner = "ds"
-}
+# target group
+resource "aws_lb_target_group" "target-group" {
+  name        = "deham14-tg"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "instance"
+  vpc_id      = aws_vpc.dev_vpc.id
 
-### Select the newest AMI
-
-data "aws_ami" "latest_linux_ami" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-2023*x86_64"]
-  }
-}
-
-### Create an EC2 instance
-
-resource "aws_instance" "instance" {
-  #ami                         = data.aws_ami.latest_linux_ami.id
-  ami = var.AMIs[var.AWS_REGION]
-  instance_type               = "t3.micro"
-  availability_zone           = "us-east-1a"
-  associate_public_ip_address = true
-  key_name                    = "deham9-iam"
-  vpc_security_group_ids      = [aws_security_group.sg_vpc.id]
-  subnet_id                   = aws_subnet.public-1.id
-  iam_instance_profile        = "deham10_ec2"
-  count = 1
   tags = {
-    Name = local.name
+    name = "deham14"
   }
-  #user_data = file("userdata.sh")
-  user_data = "${base64encode(data.template_file.ec2userdatatemplate.rendered)}"
 
-  provisioner "local-exec" {
-    command = "echo Instance Type = ${self.instance_type}, Instance ID = ${self.id}, Public IP = ${self.public_ip}, AMI ID = ${self.ami} >> metadata"
+  health_check {
+    enabled             = true
+    interval            = 10
+    path                = "/"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
   }
 }
 
+# creating ALB
+resource "aws_lb" "application-lb" {
+  name               = "deham14-alb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = [aws_subnet.public-1.id,aws_subnet.public-2.id]
+  security_groups    = [aws_security_group.sg_vpc.id]
+  ip_address_type    = "ipv4"
 
-data "template_file" "ec2userdatatemplate" {
-  template = "${file("userdata.tpl")}"
+  tags = {
+    name = "deham14"
+  }
 }
 
-output "ec2rendered" {
-  value = "${data.template_file.ec2userdatatemplate.rendered}"
+resource "aws_lb_listener" "alb-listener" {
+  load_balancer_arn = aws_lb.application-lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.target-group.arn
+  }
 }
 
-output "public_ip" {
-  value = aws_instance.instance[0].public_ip
+resource "aws_lb_target_group_attachment" "ec2_attach" {
+  count            = length(aws_instance.instance)
+  target_group_arn = aws_lb_target_group.target-group.arn
+  target_id        = aws_instance.instance[count.index].id
 }
