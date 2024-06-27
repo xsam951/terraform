@@ -67,7 +67,6 @@ resource "aws_instance" "instance" {
   }
 
   user_data = file("userdata.tpl")
-# user_data = "${base64encode(data.template_file.ec2userdatatemplate.rendered)}"
 
   provisioner "local-exec" {
     command = "echo Instance Type = ${self.instance_type}, Instance ID = ${self.id}, Public IP = ${self.public_ip}, AMI ID = ${self.ami} >> metadata"
